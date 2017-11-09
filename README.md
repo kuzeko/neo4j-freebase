@@ -3,9 +3,9 @@
 
 ## Set up Neo4j Server, and Load Cleaned Freebase Dump
 
-This suite, downloads data from [The Freebase ExQ Data Dump](https://disi.unitn.it/~lissandrini/notes/freebase-data-dump.html), and loads it into a Neo4j server.
+This suite downloads data from [The Freebase ExQ Data Dump](https://disi.unitn.it/~lissandrini/notes/freebase-data-dump.html), and loads it into a Neo4j server.
 
-Nodes are of two types: **Entities** and **Types**, edges instead have around 4K alternatives.
+Nodes are of two types: **Entities** and **Types**, edges instead have around __4K__ alternatives.
 
 
 
