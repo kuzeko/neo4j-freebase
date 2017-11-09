@@ -35,14 +35,14 @@ def download_file_from_google_drive(id, destination):
         params = { 'id' : id, 'confirm' : token }
         response = session.get(URL, params = params, stream = True)
 
-    save_response_content(response, destination)    
+    save_response_content(response, destination)
 
 
 if __name__ == "__main__":
     import sys
     params=[]
     if len(sys.argv) < 2 or len(sys.argv) > 3:
-        sys.stderr.write("Usage: python google_drive.py drive_file_id destination_file_path")
+        sys.stderr.write("Usage: python download.py <drive_file_id destination_file_path|file.list>")
 	sys.exit(2)
     if len(sys.argv) is 2:
         with open(sys.argv[1], 'r') as lfile:

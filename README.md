@@ -11,7 +11,10 @@ Nodes are of two types: **Entities** and **Types**, edges instead have around 4K
 
 ## Instructions:
 
-  1. Use `scripts/preprocess.sh` to download and clean the files
+
+  0. Use `scripts/download.py` or manually download the required files, they are listed in `scripts/files.list`
+
+  1. Use `scripts/preprocess.sh` to clean the file and produce the required `.csv` files in `./data`
 
   2. Use `scripts/build.sh` to build the docker images
 
