@@ -2,20 +2,26 @@
 # set an initial value for the flag
 CMD='neo4j'
 NEO4J_AUTH='none'
-MAX_MEM='15360m'
+MAX_MEM='25360m'
 IS_NEO=0
 DOCKER_OPT='-it'
 
 # read the options
-TEMP=`getopt -o aidx --long auth,import,dumpconf,index -n 'run.sh' -- "$@"`
+TEMP=`getopt -o aidxms --long auth,import,dumpconf,index,mem,cyphershell -n 'run.sh' -- "$@"`
 eval set -- "$TEMP"
 
 # extract options and their arguments into variables.
 while true ; do
     case "$1" in
+        -m|--mem)
+            case "$2" in
+                "") MAX_MEM='25360m' ; shift 2 ;;
+                 *) MAX_MEM=$2 ; echo "Max Memory set to $MAX_MEM"; shift 2 ;;
+            esac ;;
         -a|--auth) NEO4J_AUTH='neo4j/neo4jPassword'; IS_NEO=1 ; shift ;;
         -i|--import) CMD='import'; IS_NEO=1 ; shift ;;
         -x|--index) CMD='index'; IS_NEO=1 ; shift ;;
+        -s|--cyphershell) CMD='shell'; IS_NEO=1 ; shift ;;
         -d|--dumpconf)
            CMD='dump-config'
            CONF_VOL="--volume=`pwd`/conf:/conf"
@@ -46,11 +52,14 @@ fi
 
 
 if [[ $IS_NEO -eq 1 ]]; then
-
+  echo "Starting Neo4j"
   docker run  --publish=7473:7473 --publish=7474:7474 --publish=7687:7687 --publish=8080:8080  \
             --volume=`pwd`/dbms:/dbms   --volume=`pwd`/data:/data  ${CONF_VOL} \
-            ${DOCKER_OPT} -e NEO4J_AUTH=${NEO4J_AUTH}  --env=NEO4J_dbms_memory_heap_maxSize=${MAX_MEM} \
+            ${DOCKER_OPT} -e NEO4J_AUTH=${NEO4J_AUTH}      \
+            -e NEO4J_dbms_memory_heap_initial__size=4096M  \
+            -e NEO4J_dbms_memory_heap_max__size=${MAX_MEM} \
             lissandrini/neo4j-server ${CMD}
+
   RET=$?
 
   if [ ${CMD} == 'import' ]; then
@@ -68,4 +77,9 @@ if [[ $IS_NEO -eq 1 ]]; then
       echo "The index failed for some reason..."
     fi
   fi
+
+else
+  echo "Nothing to do!"
+  exit 1
 fi
+

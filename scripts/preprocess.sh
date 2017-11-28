@@ -13,6 +13,17 @@ if [[ ! -f data/freebase-nodes-in-out-name.tsv ]]; then
     rm -i -v freebase-nodes-in-out-name.tsv.tar.gz
 fi
 
+if [[ ! -f data/freebase-nodes-scores.tsv ]]; then
+    echo "Decompressing node scores file"
+    tar -xzvf freebase-nodes-scores.tsv.tar.gz  -C  data/
+    echo "Sortin node scores file"
+    sort -k1,1 freebase-nodes-scores.tsv > freebase-nodes-scores.sort.tsv
+    mv freebase-nodes-scores.sort.tsv freebase-nodes-scores.tsv
+    rm -i -v freebase-nodes-scores.tsv.tar.gz
+fi
+
+
+
 if [[ ! -f data/types.list ]]; then
    echo -n "Extracting types..."
    LANG=en_EN  grep  "[[:space:]]6848$" data/freebase-sout.graph | tr ' ' ',' | tee -a data/isA.csv | cut -f 2 -d',' |  sort -k 1,1  | uniq   > data/types.list
@@ -20,7 +31,7 @@ if [[ ! -f data/types.list ]]; then
    join -t, -1 3 data/isA.csv  <(grep -Fw 6848 data/freebase-labels.tsv | cut -f 1,3,4 | tr '\t' ',') -o 1.1,1.2,2.1,2.2,2.3 > data/types.edges.csv
    rm data/isA.csv
    #48,82698385,6848,/type/object/type,"Type"
-   echo ":LONG:START_ID,:LONG:END_ID,labelId:LONG,:TYPE,name" > data/types.edges.header.csv
+   echo ":START_ID:LONG,:END_ID:LONG,labelId:LONG,:TYPE,name" > data/types.edges.header.csv
 
    echo "Extracting Relationships"
    sed -i 's/,/;/g' data/freebase-labels.tsv
@@ -29,15 +40,25 @@ if [[ ! -f data/types.list ]]; then
    join -t, -1 3 data/other.csv  <(grep -Fwv 6848 data/freebase-labels.tsv | cut -f 1,3,4 | tr '\t' ',') -o 1.1,1.2,2.1,2.2,2.3 > data/other.edges.csv
    rm data/other.csv
    #48,82698385,6848,/type/object/type,"Type"
-   echo ":LONG:START_ID,:LONG:END_ID,labelId:LONG,:TYPE,name" > data/other.edges.header.csv
+   echo ":START_ID:LONG,:END_ID:LONG,labelId:LONG,:TYPE,name" > data/other.edges.header.csv
+
+   echo "Formatting Relationship types"
+   echo "labelId:ID:LONG,frequency:INT,code,name,domain,subj,obj" > data/edge-labels.header.csv
+   grep -Fvw 6848 data/freebase-labels.tsv | awk '{ split($0, quoted, "\"");split($3,tokens,"/"); $4 = quoted[2]} { print $1 "," $2 "," $3 "," "\"" $4  "\"" "," tokens[2] "," tokens[3] "," tokens[4] }' > data/edge-labels.csv
+
 fi
 
 if [[ ! -f  data/types.csv ]]; then
    echo "Generating Types and Enities lists"
-   echo  "lid:LONG:ID,indegree:INT,outdegree:INT,name" > data/types.csv
-   join data/types.list data/freebase-nodes-in-out-name.tsv | grep -Fwv '""' | grep -Fv 'alert(' | tr ' ' ',' | tr -d '\\'  >> data/types.csv
-   echo  "lid:LONG:ID,indegree:INT,outdegree:INT,name" > data/entities.csv
-   join -v2  data/types.list data/freebase-nodes-in-out-name.tsv  | grep -Fv 'alert(' | sed  -r 's/\\+"$/"/g'  | tr ' ' ',' >> data/entities.csv
+   echo  "lid:ID:LONG,indegree:INT,outdegree:INT,name" > data/types.header.csv
+   # Remove some nasty XSS tests
+   join data/types.list data/freebase-nodes-in-out-name.tsv | grep -Fwv '""' | grep -Fv 'alert(' | tr -d '\\'   | sort -k1,1 > data/types.csv
+   echo  "lid:ID:LONG,indegree:INT,outdegree:INT,name,score:FLOAT" > data/entities.header.csv
+   # Remove some nasty XSS tests
+   join -v2  data/types.list data/freebase-nodes-in-out-name.tsv  | grep -Fv 'alert(' | sed  -r 's/\\+"$/"/g'   | sort -k1,1 > data/entities.temp.csv
+   join -t, -a1 -e "" data/entities.temp.csv <( cat data/freebase-nodes-scores.tsv | tr '\t' ',' | sort -k1,1 -t, ) > data/entities.csv
+   rm data/entities.temp.csv
+
 fi
 
 mkdir -p dbms

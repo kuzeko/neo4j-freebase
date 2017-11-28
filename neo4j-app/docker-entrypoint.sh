@@ -1,8 +1,5 @@
 #!/bin/bash -eu
 
-
-#!/bin/bash -eu
-
     if [ "$NEO4J_EDITION" == "enterprise" ]; then
         if [ "${NEO4J_ACCEPT_LICENSE_AGREEMENT:=no}" != "yes" ]; then
             echo "
@@ -171,7 +168,16 @@ elif [ "$1" == "import" ]; then
     source /import-data.sh
 elif [ "$1" == "index" ]; then
     if [[ -d  /dbms/databases ]]; then
+       [ -f "${EXTENSION_SCRIPT:-}" ] && . ${EXTENSION_SCRIPT}
        source /create-index.sh
+    else
+       echo "Database not found. Have your run Import?"
+       exit 1
+    fi
+elif [ "$1" == "shell" ]; then
+    if [[ -d  /dbms/databases ]]; then
+    [ -f "${EXTENSION_SCRIPT:-}" ] && . ${EXTENSION_SCRIPT}
+      source /cypher-shell.sh
     else
        echo "Database not found. Have your run Import?"
        exit 1
