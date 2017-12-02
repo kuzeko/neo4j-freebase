@@ -31,4 +31,4 @@ bin/neo4j stop
 
 exit $RET
 
-#./bin/neo4j-shell -path /dbms/databases/ -c < /index.cql && echo "Indexes Done"
+#./bin/neo4j-shell -path /dbms/databases/ -c < /index.cql && echo "Indexes Done" 

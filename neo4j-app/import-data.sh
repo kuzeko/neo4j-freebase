@@ -2,7 +2,7 @@
 bin/neo4j-admin import --mode=csv --database=graph.db  --report-file=/dbms/import-log.log   \
                  --nodes:Entity="/data/entities.header.csv,/data/entities.csv" \
                  --nodes:Type="/data/types.header.csv,/data/types.csv" \
-                 --nodes:Relation="/data/edges-labels.header.csv,/data/edges-labels.csv" \
+                 --nodes:Relation="/data/edge-labels.header.csv,/data/edge-labels.csv" \
                  --ignore-missing-nodes=true \
                  --ignore-duplicate-nodes=true \
                  --relationships="/data/other.edges.header.csv,/data/other.edges.csv" \
