@@ -1,6 +1,6 @@
 #!/bin/bash
 # set an initial value for the flag
-BUILD_NEO=0
+BUILD_NEO=1
 
 # read the options
 TEMP=`getopt -o n --long neo4j -n 'run.sh' -- "$@"`
